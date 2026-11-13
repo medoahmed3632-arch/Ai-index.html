@@ -1,38 +1,235 @@
 ```html
-<!-- ... existing code ... -->
-                <!-- النمط البصري للفيديو -->
-                <div class="mb-6">
-                    <label class="block text-sm font-semibold text-zinc-300 mb-2">نوع الأنيميشن والمحاكاة الحية (AI Live Motion Engine):</label>
-                    <div class="grid grid-cols-3 gap-2" id="style-selector">
-                        <button type="button" data-style="Holographic 3D Scientific & Chemistry Simulation (Titration glassware, animated pH curves, glowing molecules, neon cyan & magenta)" class="style-btn active p-2.5 rounded-xl border border-purple-500 bg-purple-500/20 text-xs font-semibold text-center transition">
-                            🧪 محاكاة علمية وتفاعلية
-                        </button>
-                        <button type="button" data-style="Dynamic Motion Graphics & Infographics (Animated charts, glowing vectors, sleek futuristic HUD)" class="style-btn p-2.5 rounded-xl border border-zinc-700 bg-zinc-900/80 hover:border-zinc-500 text-xs font-semibold text-center transition">
-                            📊 موشن جرافيك ورسوم بيانية
-                        </button>
-                        <button type="button" data-style="3D Physics & Space Energy Simulation (Orbits, waves, particles, volumetric neon glow)" class="style-btn p-2.5 rounded-xl border border-zinc-700 bg-zinc-900/80 hover:border-zinc-500 text-xs font-semibold text-center transition">
-                            🌌 محاكاة فيزيائية وطاقة 3D
-                        </button>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>استوديو نوفا AI - محرك الأنيميشن والمحاكاة الذكية</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Cairo', 'Inter', sans-serif; }
+        .glass-panel { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .glow-effect { box-shadow: 0 0 30px -5px rgba(168, 85, 247, 0.25); }
+        .style-btn.active { border-color: #a855f7; background: rgba(168, 85, 247, 0.18); }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased">
+
+    <!-- نافذة إعداد مفتاح الـ API -->
+    <div id="api-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-panel w-full max-w-md rounded-2xl p-6 border border-purple-500/30 glow-effect">
+            <h3 class="text-xl font-bold text-white mb-2">إعداد مفتاح Gemini API</h3>
+            <p class="text-xs text-zinc-400 mb-4">لضمان عمل محرك الأنيميشن الذكي وتوليد الصوت الإنجليزي بسلاسة على موقعك، يرجى إدخال مفتاح الـ API المجاني الخاص بك:</p>
+            <input type="password" id="api-key-input" placeholder="AIzaSy..." class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500 mb-4">
+            <div class="flex gap-2">
+                <button id="save-api-key" class="flex-1 bg-purple-600 hover:bg-purple-500 text-white font-bold py-2.5 rounded-xl text-sm transition">حفظ وتفعيل</button>
+                <button id="close-api-modal" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-4 py-2.5 rounded-xl text-sm transition">إلغاء</button>
+            </div>
+            <p class="text-[11px] text-zinc-500 mt-3 text-center">لا تمتلك مفتاحاً؟ <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-purple-400 underline">احصل على مفتاح مجاني من هنا</a></p>
+        </div>
+    </div>
+
+    <!-- إشعار عائم -->
+    <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 bg-zinc-900 border border-zinc-700 text-white px-6 py-3 rounded-2xl shadow-2xl transition-all duration-300 opacity-0 pointer-events-none text-sm font-semibold flex items-center gap-3">
+        <span id="toast-icon">✨</span>
+        <span id="toast-msg">رسالة إشعار</span>
+    </div>
+
+    <!-- شريط التنقل العلوي -->
+    <header class="glass-panel sticky top-0 z-40 border-b border-zinc-800/80 px-4 lg:px-8 py-3.5 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 to-cyan-500 flex items-center justify-center font-black text-xl shadow-lg">N</div>
+            <div>
+                <h1 class="font-bold text-base text-white tracking-wide">استوديو نوفا AI</h1>
+                <p class="text-[11px] text-zinc-400">محرك الأنيميشن والمحاكاة العلمية الذكية</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <button id="open-api-btn" class="bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-xs font-semibold px-3.5 py-2 rounded-xl text-zinc-300 flex items-center gap-2 transition">
+                <span>🔑</span> مفتاح API
+            </button>
+        </div>
+    </header>
+
+    <!-- المحتوى الرئيسي -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- لوحة التحكم وإدخال البرومبت -->
+        <section class="lg:col-span-5 flex flex-col gap-6">
+            <div class="glass-panel rounded-2xl p-5 lg:p-6 glow-effect flex flex-col gap-5">
+                <h2 class="font-bold text-lg text-white flex items-center gap-2">
+                    <span>🎬</span> صمم فكرة الفيديو (حتى 10 دقائق)
+                </h2>
+
+                <!-- خانة البرومبت -->
+                <div>
+                    <label class="block text-sm font-semibold text-zinc-300 mb-2">اكتب البرومبت أو شرح التجربة بالتفصيل:</label>
+                    <textarea id="prompt-input" rows="5" class="w-full bg-zinc-900/90 border border-zinc-700 rounded-xl p-4 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500 resize-none transition" placeholder="مثال: اشرح عملية المعايراً الكيميائية (Titration) بالتفصيل مع رسم منحنى الـ Titration Curve لحظة بلحظة، تغيير لون المحلول في الدورق من الشفاف للوردي، وتوضيح نقطة التكافؤ..."></textarea>
+                </div>
+
+                <!-- شريط التحكم في المدة -->
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="text-sm font-semibold text-zinc-300">مدة الفيديو المطلوبة:</label>
+                        <span id="duration-val" class="bg-purple-500/20 text-purple-400 text-xs font-bold px-3 py-1 rounded-lg border border-purple-500/30">3 دقائق</span>
+                    </div>
+                    <input type="range" id="duration-slider" min="0.5" max="10" step="0.5" value="3" class="w-full accent-purple-500 cursor-pointer">
+                    <div class="flex justify-between text-[11px] text-zinc-500 mt-1">
+                        <span>30 ثانية</span>
+                        <span>5 دقائق</span>
+                        <span>10 دقائق (أقصى حد)</span>
                     </div>
                 </div>
 
-                <!-- زر الإنشاء الرئيسي -->
-<!-- ... existing code ... -->
+                <!-- اختيار الصوت الإنجليزي -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-zinc-300 mb-1.5">صوت المتحدث الإنجليزي:</label>
+                        <select id="voice-select" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-purple-500">
+                            <option value="en-US-Journey-F">صوت أنثوي وثائقي (Journey F)</option>
+                            <option value="en-US-Journey-D">صوت ذكوري عميق (Journey D)</option>
+                            <option value="en-US-Neural2-F">صوت أنثوي حيوي (Neural2 F)</option>
+                            <option value="en-US-Neural2-J">صوت ذكوري احترافي (Neural2 J)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-zinc-300 mb-1.5">تشغيل الشرح الصوتي:</label>
+                        <div class="flex items-center h-10">
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="narrator-toggle" value="" class="sr-only peer" checked>
+                                <div class="w-11 h-6 bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                                <span class="mr-3 text-xs font-semibold text-zinc-300">متحدث إنجليزي</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- زر الإنشاء -->
+                <button id="generate-btn" class="w-full bg-gradient-to-r from-purple-600 to-cyan-500 hover:opacity-90 text-white font-bold py-3.5 px-6 rounded-xl shadow-xl transition flex items-center justify-center gap-2 text-base">
+                    <span>⚡</span> إنشاء الفيديو المتحرك الآن
+                </button>
+            </div>
+
+            <!-- مؤشر التقدم والتوليد -->
+            <div id="progress-box" class="glass-panel rounded-2xl p-5 hidden flex flex-col gap-3">
+                <div class="flex justify-between text-xs font-bold text-zinc-300">
+                    <span id="progress-status">جاري تحليل البرومبت وبرمجة المشاهد...</span>
+                    <span id="progress-percent">0%</span>
+                </div>
+                <div class="w-full bg-zinc-900 rounded-full h-2.5 overflow-hidden">
+                    <div id="progress-bar" class="bg-gradient-to-r from-purple-500 to-cyan-400 h-full w-0 transition-all duration-300"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- لوحة عرض الفيديو والأنيميشن الحي -->
+        <section class="lg:col-span-7 flex flex-col gap-5">
+            <div id="video-stage" class="glass-panel rounded-2xl overflow-hidden shadow-2xl flex flex-col relative aspect-video border border-zinc-800">
+                
+                <!-- رسالة ترحيبية قبل الإنشاء -->
+                <div id="stage-placeholder" class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-slate-950/90">
+                    <div class="w-16 h-16 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-3xl mb-3">🧪</div>
+                    <h3 class="text-lg font-bold text-white mb-1">استوديو الأنيميشن جاهز</h3>
+                    <p class="text-xs text-zinc-400 max-w-sm">اكتب فكرتك أو تجربتك العلمية (مثل Titration Curve) واضغط "إنشاء الفيديو" لتشاهد الرسوم المتحركة الحية والمحاكاة فوراَ!</p>
+                </div>
+
+                <!-- مشغل كانفاس الأنيميشن الحي -->
+                <div class="relative flex-1 bg-slate-950 overflow-hidden flex items-center justify-center">
+                    <canvas id="live-stage-canvas" class="w-full h-full object-contain"></canvas>
+                    <canvas id="export-canvas" width="1280" height="720" class="hidden"></canvas>
+                </div>
+
+                <!-- شريط الترجمة الإنجليزية (Subtitles) -->
+                <div class="absolute bottom-16 inset-x-4 pointer-events-none text-center">
+                    <div id="stage-subtitle" class="inline-block bg-black/80 backdrop-blur-md text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold max-w-xl border border-white/10 shadow-lg"></div>
+                </div>
+
+                <!-- شريط التحكم السفلي بالفيديو -->
+                <div class="bg-zinc-950/90 border-t border-zinc-800/80 px-4 py-3 flex items-center justify-between z-10">
+                    <div class="flex items-center gap-3">
+                        <button id="play-pause-btn" class="w-10 h-10 rounded-xl bg-purple-600 hover:bg-purple-500 text-white flex items-center justify-center shadow transition" disabled>
+                            ▶
+                        </button>
+                        <div class="text-xs font-bold text-zinc-300">
+                            مشهد <span id="current-scene-num">0</span> من <span id="total-scenes-num">0</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button id="export-video-btn" class="bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-xs font-semibold px-4 py-2 rounded-xl text-cyan-400 flex items-center gap-2 transition disabled:opacity-50" disabled>
+                            <span>📥</span> تصدير وتحميل الفيديو
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- خط الزمني للمشاهد -->
+            <div class="glass-panel rounded-2xl p-5 flex flex-col gap-3">
+                <h4 class="font-bold text-sm text-white flex items-center gap-2">
+                    <span>📑</span> جدول المشاهد والأنيميشن الحركي
+                </h4>
+                <div id="scenes-timeline" class="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-56 overflow-y-auto pr-1">
+                    <!-- يتم تعبئتها ديناميكياً -->
+                    <div class="text-xs text-zinc-500 text-center py-6 col-span-full">لم يتم إنشاء مشاهد بعد...</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // مفتاح API والتخزين المحلي
+        let apiKey = localStorage.getItem('nova_gemini_api_key') || "";
+        const apiModal = document.getElementById('api-modal');
+        const apiKeyInput = document.getElementById('api-key-input');
+        const openApiBtn = document.getElementById('open-api-btn');
+        const saveApiKeyBtn = document.getElementById('save-api-key');
+        const closeApiModalBtn = document.getElementById('close-api-modal');
+
+        if (!apiKey) apiModal.classList.remove('hidden');
+
+        openApiBtn.addEventListener('click', () => {
+            apiKeyInput.value = apiKey;
+            apiModal.classList.remove('hidden');
+        });
+        closeApiModalBtn.addEventListener('click', () => { if(apiKey) apiModal.classList.add('hidden'); });
+        saveApiKeyBtn.addEventListener('click', () => {
+            const val = apiKeyInput.value.trim();
+            if(val) {
+                apiKey = val;
+                localStorage.setItem('nova_gemini_api_key', val);
+                apiModal.classList.add('hidden');
+                showToast('تم حفظ المفتاح بنجاح!', 'success');
+            } else {
+                showToast('يرجى إدخال مفتاح صحيح', 'error');
+            }
+        });
+
+        // دوال الإشعارات
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toast-icon');
+            const msgEl = document.getElementById('toast-msg');
+            icon.textContent = type === 'success' ? '✨' : (type === 'info' ? 'ℹ️' : '⚠️');
+            msgEl.textContent = msg;
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => toast.classList.add('opacity-0', 'pointer-events-none'), 3500);
+        }
+
+        // التحكم في مدة الفيديو
+        const durationSlider = document.getElementById('duration-slider');
+        const durationVal = document.getElementById('duration-val');
+        durationSlider.addEventListener('input', (e) => {
+            durationVal.textContent = `${e.target.value} دقائق`;
+        });
+
         // حالة التطبيق
-        let selectedStyle = "Holographic 3D Scientific & Chemistry Simulation (Titration glassware, animated pH curves, glowing molecules, neon cyan & magenta)";
-        let generatedScenes = []; // مصفوفة المشاهد: { sceneNumber, durationSec, narrationEn, summaryAr, animationType, animConfig, customDrawFn, audioUrl }
+        let generatedScenes = [];
         let currentSceneIndex = 0;
         let isPlaying = false;
         let currentAudioElement = null;
         let sceneTimer = null;
-        let elapsedSeconds = 0;
-        let totalVideoSeconds = 0;
-        let clockInterval = null;
-
-        // محرك الأنيميشن البرمجي الحي (AI Procedural Motion Graphics & Scientific Simulation Engine)
         const liveCanvas = document.getElementById('live-stage-canvas');
         const liveCtx = liveCanvas.getContext('2d');
-        let animationFrameId = null;
         let sceneStartTime = performance.now();
         let particles = [];
 
@@ -52,9 +249,7 @@
         }
         initParticles();
 
-        // دوال مساعدة للرسم الهولوجرامي والرسوم المتحركة العلمية
         function drawHologramGrid(ctx, w, h, t) {
-            // خلفية متدرجة داكنة احترافية
             const bgGrad = ctx.createRadialGradient(w * 0.5, h * 0.5, 50, w * 0.5, h * 0.5, w * 0.8);
             bgGrad.addColorStop(0, '#0f172a');
             bgGrad.addColorStop(0.6, '#090d16');
@@ -62,7 +257,6 @@
             ctx.fillStyle = bgGrad;
             ctx.fillRect(0, 0, w, h);
 
-            // شبكة هولوجرام متحركة
             ctx.strokeStyle = 'rgba(6, 182, 212, 0.08)';
             ctx.lineWidth = 1;
             const gridSize = 45;
@@ -75,58 +269,30 @@
             }
         }
 
-        // محرك رسم محاكاة المعايرة الكيميائية (Titration + Titration Curve) الحية
+        // محاكاة المعايرة الكيميائية والمنحنى البياني
         function drawTitrationSimulation(ctx, w, h, progress, t, config) {
             const leftX = w * 0.28;
             const rightX = w * 0.68;
 
-            // --- الجانب الأيسر: السحاحة (Burette) والدورق (Flask) وتغير اللون ---
             ctx.save();
-            // حامل السحاحة
             ctx.strokeStyle = 'rgba(148, 163, 184, 0.5)';
             ctx.lineWidth = 4;
             ctx.beginPath();
-            ctx.moveTo(leftX - 85, h * 0.85);
-            ctx.lineTo(leftX - 85, h * 0.14);
-            ctx.moveTo(leftX - 120, h * 0.85);
-            ctx.lineTo(leftX + 70, h * 0.85);
-            ctx.moveTo(leftX - 85, h * 0.25);
-            ctx.lineTo(leftX, h * 0.25);
+            ctx.moveTo(leftX - 85, h * 0.85); ctx.lineTo(leftX - 85, h * 0.14);
+            ctx.moveTo(leftX - 120, h * 0.85); ctx.lineTo(leftX + 70, h * 0.85);
+            ctx.moveTo(leftX - 85, h * 0.25); ctx.lineTo(leftX, h * 0.25);
             ctx.stroke();
 
-            // أنبوبة السحاحة (Burette)
-            const buretteW = 22;
-            const buretteTop = h * 0.15;
-            const buretteBot = h * 0.48;
-            const buretteH = buretteBot - buretteTop;
-
-            // السائل داخل السحاحة ينخفض تدريجياً مع التقدم
+            const buretteW = 22, buretteTop = h * 0.15, buretteBot = h * 0.48, buretteH = buretteBot - buretteTop;
             const titrantLevel = Math.max(0.15, 0.92 - progress * 0.72);
             const liquidH = buretteH * titrantLevel;
             ctx.fillStyle = 'rgba(56, 189, 248, 0.55)';
             ctx.fillRect(leftX - buretteW / 2 + 2, buretteBot - liquidH, buretteW - 4, liquidH);
 
-            // زجاج السحاحة وتدريجاتها
             ctx.strokeStyle = '#38bdf8';
             ctx.lineWidth = 2;
             ctx.strokeRect(leftX - buretteW / 2, buretteTop, buretteW, buretteH);
-            for (let m = 0; m <= 10; m++) {
-                const my = buretteTop + (buretteH / 10) * m;
-                ctx.beginPath();
-                ctx.moveTo(leftX - buretteW / 2, my);
-                ctx.lineTo(leftX - buretteW / 2 + (m % 5 === 0 ? 10 : 5), my);
-                ctx.stroke();
-            }
 
-            // طرف السحاحة والصنبور
-            ctx.beginPath();
-            ctx.moveTo(leftX - 4, buretteBot);
-            ctx.lineTo(leftX - 2, buretteBot + 24);
-            ctx.moveTo(leftX + 4, buretteBot);
-            ctx.lineTo(leftX + 2, buretteBot + 24);
-            ctx.stroke();
-
-            // قطرات نازلة متحركة باستمرار!
             const dropCycle = (t * 2.2) % 1;
             const dropY = buretteBot + 28 + dropCycle * (h * 0.16);
             ctx.fillStyle = '#38bdf8';
@@ -137,20 +303,12 @@
             ctx.fill();
             ctx.shadowBlur = 0;
 
-            // الدورق المخروطي (Erlenmeyer Flask)
-            const flaskTopY = h * 0.58;
-            const flaskBotY = h * 0.84;
-            const neckW = 28;
-            const baseW = 115;
-
-            // حساب لون المحلول بناءً على نقطة التكافؤ (Equivalence Point)
-            // قبل نقطة التكافؤ: شفاف/سماوي خفيف -> عند التكافؤ (progress > 0.55): يتحول للوردي المتوهج (Phenolphthalein endpoint)
+            const flaskTopY = h * 0.58, flaskBotY = h * 0.84, neckW = 28, baseW = 115;
             const eqFactor = Math.min(1, Math.max(0, (progress - 0.52) / 0.12));
             const rCol = Math.round(56 + eqFactor * (236 - 56));
             const gCol = Math.round(189 + eqFactor * (72 - 189));
             const bCol = Math.round(248 + eqFactor * (153 - 248));
 
-            // رسم السائل داخل الدورق مع تموج سطحي
             const fillRatio = 0.45 + progress * 0.18;
             const liqTopY = flaskBotY - (flaskBotY - flaskTopY) * fillRatio;
             const topLiqHalfW = (neckW / 2) + ((baseW - neckW) / 2) * (1 - fillRatio);
@@ -160,7 +318,6 @@
             ctx.shadowBlur = 18;
             ctx.beginPath();
             ctx.moveTo(leftX - topLiqHalfW, liqTopY);
-            // تموج سطح السائل
             for (let wx = -topLiqHalfW; wx <= topLiqHalfW; wx += 5) {
                 const wave = Math.sin(wx * 0.15 + t * 6) * 2.5;
                 ctx.lineTo(leftX + wx, liqTopY + wave);
@@ -171,7 +328,6 @@
             ctx.fill();
             ctx.shadowBlur = 0;
 
-            // حدود زجاج الدورق
             ctx.strokeStyle = 'rgba(226, 232, 240, 0.85)';
             ctx.lineWidth = 2.5;
             ctx.beginPath();
@@ -183,18 +339,6 @@
             ctx.lineTo(leftX + neckW / 2, flaskTopY - 22);
             ctx.stroke();
 
-            // جزيئات أيونات H+ و OH- تتحرك داخل المحلول
-            for (let k = 0; k < 10; k++) {
-                const angle = t * 2 + k * 0.7;
-                const ix = leftX + Math.cos(angle) * (25 + (k % 3) * 12);
-                const iy = (liqTopY + flaskBotY) / 2 + Math.sin(angle * 1.3) * 18;
-                ctx.fillStyle = k % 2 === 0 ? '#22d3ee' : '#f472b6';
-                ctx.beginPath();
-                ctx.arc(ix, iy, 3, 0, Math.PI * 2);
-                ctx.fill();
-            }
-
-            // تسمية الحالة تحت الدورق
             ctx.fillStyle = '#e2e8f0';
             ctx.font = 'bold 14px Inter, sans-serif';
             ctx.textAlign = 'center';
@@ -202,14 +346,9 @@
             ctx.fillText(statusText, leftX, flaskBotY + 26);
             ctx.restore();
 
-            // --- الجانب الأيمن: رسم منحنى المعايرة (Titration Curve) لحظة بلحظة ---
+            // الرسم البياني للـ Titration Curve
             ctx.save();
-            const chartW = w * 0.42;
-            const chartH = h * 0.56;
-            const chartX = rightX - chartW / 2;
-            const chartY = h * 0.22;
-
-            // إطار هولوجرام للرسم البياني
+            const chartW = w * 0.42, chartH = h * 0.56, chartX = rightX - chartW / 2, chartY = h * 0.22;
             ctx.fillStyle = 'rgba(15, 23, 42, 0.75)';
             ctx.strokeStyle = 'rgba(6, 182, 212, 0.5)';
             ctx.lineWidth = 1.5;
@@ -218,69 +357,44 @@
             ctx.fill();
             ctx.stroke();
 
-            // عنوان الرسم البياني
             ctx.fillStyle = '#38bdf8';
             ctx.font = 'bold 15px Inter, sans-serif';
             ctx.textAlign = 'left';
-            ctx.fillText(config?.chartTitle || 'LIVE TITRATION CURVE (pH vs Volume)', chartX, chartY - 12);
+            ctx.fillText('LIVE TITRATION CURVE (pH vs Volume)', chartX, chartY - 12);
 
-            // محاور X و Y
             ctx.strokeStyle = 'rgba(148, 163, 184, 0.7)';
             ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.moveTo(chartX, chartY);
-            ctx.lineTo(chartX, chartY + chartH);
-            ctx.lineTo(chartX + chartW, chartY + chartH);
+            ctx.moveTo(chartX, chartY); ctx.lineTo(chartX, chartY + chartH); ctx.lineTo(chartX + chartW, chartY + chartH);
             ctx.stroke();
 
-            // تسميات المحاور
-            ctx.fillStyle = '#94a3b8';
-            ctx.font = '12px Inter, sans-serif';
-            ctx.fillText('pH 14', chartX - 38, chartY + 10);
-            ctx.fillText('pH 7', chartX - 32, chartY + chartH / 2);
-            ctx.fillText('pH 0', chartX - 32, chartY + chartH);
-            ctx.fillText('Volume of Titrant Added (mL) →', chartX + chartW * 0.25, chartY + chartH + 24);
-
-            // رسم المنحنى السيني (Sigmoid Titration Curve) تدريجياً حسب التقدم
             ctx.strokeStyle = '#ec4899';
             ctx.shadowColor = '#ec4899';
             ctx.shadowBlur = 12;
             ctx.lineWidth = 3.5;
             ctx.beginPath();
-
             const steps = 100;
             const maxStep = Math.max(2, Math.floor(progress * steps));
-            let lastPx = chartX;
-            let lastPy = chartY + chartH;
-
+            let lastPx = chartX, lastPy = chartY + chartH;
             for (let s = 0; s <= maxStep; s++) {
-                const u = s / steps; // من 0 إلى 1
-                // معادلة منحنى المعايرة S-Curve
+                const u = s / steps;
                 const phNorm = 0.12 + 0.76 / (1 + Math.exp(-18 * (u - 0.56)));
                 const px = chartX + u * chartW;
                 const py = chartY + chartH - phNorm * chartH;
-                if (s === 0) ctx.moveTo(px, py);
-                else ctx.lineTo(px, py);
-                lastPx = px;
-                lastPy = py;
+                if (s === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+                lastPx = px; lastPy = py;
             }
             ctx.stroke();
             ctx.shadowBlur = 0;
 
-            // نقطة متوهجة تتحرك على رأس المنحنى وتعرض قيمة الـ pH الحالية
             const currentPH = (1.5 + (11.2 / (1 + Math.exp(-18 * (progress - 0.56))))).toFixed(2);
             ctx.fillStyle = '#22d3ee';
-            ctx.shadowColor = '#22d3ee';
-            ctx.shadowBlur = 14;
             ctx.beginPath();
             ctx.arc(lastPx, lastPy, 6, 0, Math.PI * 2);
             ctx.fill();
-            ctx.shadowBlur = 0;
 
-            // صندوق قراءة pH الحي
             ctx.fillStyle = 'rgba(6, 182, 212, 0.2)';
             ctx.strokeStyle = '#22d3ee';
-            ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.roundRect(chartX + chartW - 115, chartY + 8, 108, 32, 8);
             ctx.fill();
@@ -288,79 +402,43 @@
             ctx.fillStyle = '#ffffff';
             ctx.font = 'bold 13px Inter, sans-serif';
             ctx.fillText(`pH = ${currentPH}`, chartX + chartW - 102, chartY + 28);
-
-            // علامة نقطة التكافؤ عند المنتصف
-            if (progress >= 0.56) {
-                const eqX = chartX + 0.56 * chartW;
-                const eqY = chartY + chartH * 0.5;
-                ctx.setLineDash([4, 4]);
-                ctx.strokeStyle = '#fbbf24';
-                ctx.beginPath();
-                ctx.moveTo(eqX, chartY + chartH);
-                ctx.lineTo(eqX, eqY);
-                ctx.lineTo(chartX, eqY);
-                ctx.stroke();
-                ctx.setLineDash([]);
-
-                ctx.fillStyle = '#fbbf24';
-                ctx.font = 'bold 11px Inter, sans-serif';
-                ctx.fillText('Equivalence Point', eqX + 8, eqY - 6);
-            }
             ctx.restore();
         }
 
-        // محرك رسم عام للموضوعات الأخرى (كود أنيميشن مخصص يكتبه Gemini لكل مشهد)
         function drawDynamicSceneAnimation(ctx, w, h, progress, t, scene) {
             drawHologramGrid(ctx, w, h, t);
-
-            // جزيئات خلفية متوهجة
             for (let i = 0; i < particles.length; i++) {
                 const p = particles[i];
                 if (isPlaying) {
-                    p.x += p.vx;
-                    p.y += p.vy;
-                    if (p.y < 0) p.y = 1;
-                    if (p.x < 0) p.x = 1;
-                    if (p.x > 1) p.x = 0;
+                    p.x += p.vx; p.y += p.vy;
+                    if (p.y < 0) p.y = 1; if (p.x < 0) p.x = 1; if (p.x > 1) p.x = 0;
                 }
                 ctx.fillStyle = `hsla(${p.hue}, 90%, 65%, ${p.alpha})`;
                 ctx.beginPath();
                 ctx.arc(p.x * w, p.y * h, p.size, 0, Math.PI * 2);
                 ctx.fill();
             }
-
             if (!scene) return;
-
-            // إذا كان المشهد كيميائي أو معايرة أو تم اختيار محاكاة المعايرة
             if (scene.animationType === 'titration') {
                 drawTitrationSimulation(ctx, w, h, progress, t, scene.animConfig);
             } else if (scene.customDrawFn) {
-                // تنفيذ كود الأنيميشن المخصص الذي ولده الذكاء الاصطناعي للمشهد
                 ctx.save();
-                try {
-                    scene.customDrawFn(ctx, w, h, progress, t);
-                } catch (err) {
-                    drawFallbackMotionGraphic(ctx, w, h, progress, t, scene);
-                }
+                try { scene.customDrawFn(ctx, w, h, progress, t); } catch(e) { drawFallback(ctx, w, h, progress, t, scene); }
                 ctx.restore();
             } else {
-                drawFallbackMotionGraphic(ctx, w, h, progress, t, scene);
+                drawFallback(ctx, w, h, progress, t, scene);
             }
         }
 
-        // رسم موشن جرافيك احترافي احتياطي لأي موضوع
-        function drawFallbackMotionGraphic(ctx, w, h, progress, t, scene) {
-            const cx = w * 0.5;
-            const cy = h * 0.45;
-            // حلقات طاقة 3D تدور
+        function drawFallback(ctx, w, h, progress, t, scene) {
+            const cx = w * 0.5, cy = h * 0.45;
             for (let r = 1; r <= 3; r++) {
                 ctx.strokeStyle = r % 2 === 0 ? 'rgba(168, 85, 247, 0.6)' : 'rgba(6, 182, 212, 0.6)';
                 ctx.lineWidth = 3;
                 ctx.beginPath();
-                ctx.ellipse(cx, cy, 70 * r, 32 * r, t * (r % 2 === 0 ? 0.8 : -0.6), 0, Math.PI * 2);
+                ctx.ellipse(cx, cy, 70 * r, 32 * r, t * 0.8, 0, Math.PI * 2);
                 ctx.stroke();
             }
-            // عنوان المشهد المتحرك
             ctx.fillStyle = '#ffffff';
             ctx.font = 'bold 22px Inter, sans-serif';
             ctx.textAlign = 'center';
@@ -368,63 +446,46 @@
         }
 
         function renderLiveAnimationLoop(now) {
-            if (!activeVideoStage.classList.contains('hidden')) {
-                const rect = liveCanvas.parentElement.getBoundingClientRect();
-                if (liveCanvas.width !== Math.floor(rect.width) || liveCanvas.height !== Math.floor(rect.height)) {
-                    liveCanvas.width = Math.floor(rect.width) || 1280;
-                    liveCanvas.height = Math.floor(rect.height) || 720;
-                }
+            const rect = liveCanvas.parentElement.getBoundingClientRect();
+            if (liveCanvas.width !== Math.floor(rect.width) || liveCanvas.height !== Math.floor(rect.height)) {
+                liveCanvas.width = Math.floor(rect.width) || 1280;
+                liveCanvas.height = Math.floor(rect.height) || 720;
+            }
+            const w = liveCanvas.width, h = liveCanvas.height;
+            const dt = (now - sceneStartTime) / 1000;
+            const scene = generatedScenes[currentSceneIndex];
+            const sceneDur = scene ? scene.durationSec : 10;
+            const progress = Math.min(1, (dt % sceneDur) / sceneDur);
 
-                const w = liveCanvas.width;
-                const h = liveCanvas.height;
-                const dt = (now - sceneStartTime) / 1000;
-                const scene = generatedScenes[currentSceneIndex];
-                const sceneDur = scene ? scene.durationSec : 10;
-                // نسبة التقدم داخل المشهد (تتكرر بنعومة لو المشهد طويل)
-                const progress = Math.min(1, (dt % sceneDur) / sceneDur);
+            liveCtx.clearRect(0, 0, w, h);
+            drawDynamicSceneAnimation(liveCtx, w, h, progress, dt, scene);
 
-                liveCtx.clearRect(0, 0, w, h);
-                drawDynamicSceneAnimation(liveCtx, w, h, progress, dt, scene);
-
-                // موجات صوتية متفاعلة أعلى الشاشة عند التحدث
-                if (isPlaying && narratorToggle.checked) {
-                    const barCount = 24;
-                    const barWidth = 3;
-                    const startX = w / 2 - ((barCount * (barWidth + 3)) / 2);
-                    liveCtx.fillStyle = 'rgba(52, 211, 153, 0.75)';
-                    for (let b = 0; b < barCount; b++) {
-                        const amp = Math.abs(Math.sin(dt * 9 + b * 0.6)) * 16 + 3;
-                        liveCtx.fillRect(startX + b * (barWidth + 3), 24 - amp / 2, barWidth, amp);
-                    }
+            if (isPlaying && document.getElementById('narrator-toggle').checked) {
+                const barCount = 24, barWidth = 3;
+                const startX = w / 2 - ((barCount * (barWidth + 3)) / 2);
+                liveCtx.fillStyle = 'rgba(52, 211, 153, 0.75)';
+                for (let b = 0; b < barCount; b++) {
+                    const amp = Math.abs(Math.sin(dt * 9 + b * 0.6)) * 16 + 3;
+                    liveCtx.fillRect(startX + b * (barWidth + 3), 24 - amp / 2, barWidth, amp);
                 }
             }
-            animationFrameId = requestAnimationFrame(renderLiveAnimationLoop);
+            requestAnimationFrame(renderLiveAnimationLoop);
         }
         requestAnimationFrame(renderLiveAnimationLoop);
 
-        // دالة إظهار الإشعارات (بديل alert)
-<!-- ... existing code ... -->
-        // 1. توليد السيناريو وكود الأنيميشن الحي لكل مشهد باستخدام Gemini 3 Flash
-        async function generateVideoScriptAndAnimations(userPrompt, totalSec, style) {
+        // توليد السيناريو والأنيميشن من Gemini
+        async function generateVideoScriptAndAnimations(userPrompt, totalSec) {
             let sceneCount = Math.max(2, Math.min(10, Math.ceil(totalSec / 18)));
             if (totalSec <= 30) sceneCount = 2;
 
-            const systemPrompt = `You are an expert AI Motion Graphics Director, Scientific Animator, and English Documentary Narrator.
-Convert the user's prompt into a structured video of ${sceneCount} animated scenes totaling ${totalSec} seconds.
-CRITICAL ANIMATION REQUIREMENT:
-Instead of static images, each scene MUST be an animated simulation drawn on HTML5 Canvas!
-1. If the user's prompt mentions chemistry, titration, titration curve, acid-base, pH, burette, flask, or chemical reaction, set "animationType": "titration" for those scenes so our precision physics/chemistry engine renders the animated burette dripping into the flask, solution color changing at equivalence point, and the live S-shaped Titration Curve plotting pH vs Volume!
-2. For ALL OTHER topics (physics, biology, math, space, history, business, technology, or any custom concept), set "animationType": "custom" and write clean, safe, self-contained JavaScript canvas drawing code inside "canvasJsCode".
-   - The code receives parameters: (ctx, w, h, progress, t) where 'progress' goes from 0.0 to 1.0 during the scene, and 't' is elapsed seconds.
-   - Use vibrant neon colors (#38bdf8, #ec4899, #a855f7, #34d399, #fbbf24), glowing lines (ctx.shadowBlur), animated graphs, moving diagrams, rotating 3D-like wireframes, flowing arrows, and clear English labels directly explaining the prompt's concepts!
-   - Do NOT use external images, DOM access, alert, or infinite while loops in canvasJsCode.
-3. Write clear, engaging, educational English voiceover narration ("narrationEn") for each scene (~2.2 words per second of scene duration).
-4. Provide a concise Arabic summary ("summaryAr") and a short English title ("visualTitle").`;
-
-            const userQuery = `User Prompt: "${userPrompt}"\nTotal Duration: ${totalSec} seconds\nVisual Theme: ${style}\nGenerate ${sceneCount} animated scenes now.`;
+            const systemPrompt = `You are an expert AI Motion Graphics Director and Scientific Animator.
+Convert user prompt into ${sceneCount} animated scenes totaling ${totalSec} seconds.
+1. If the prompt mentions titration, acid-base, pH, burette, or titration curve, set "animationType": "titration".
+2. For other topics, set "animationType": "custom" and write safe canvas JS code in "canvasJsCode" taking (ctx, w, h, progress, t).
+3. Provide English voiceover narration ("narrationEn"), Arabic summary ("summaryAr"), and English visual title ("visualTitle").`;
 
             const payload = {
-                contents: [{ parts: [{ text: userQuery }] }],
+                contents: [{ parts: [{ text: `Prompt: "${userPrompt}"\nDuration: ${totalSec}s` }] }],
                 systemInstruction: { parts: [{ text: systemPrompt }] },
                 generationConfig: {
                     responseMimeType: "application/json",
@@ -449,161 +510,253 @@ Instead of static images, each scene MUST be an animated simulation drawn on HTM
             };
 
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
-            const data = await fetchWithRetry(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
+            const res = await fetch(url, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+            const data = await res.json();
+            const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+            if(!text) throw new Error("فشل الاتصال بالذكاء الاصطناعي");
+            const parsed = JSON.parse(text);
 
-            const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (!rawText) throw new Error("فشل في توليد السيناريو والأنيميشن من الذكاء الاصطناعي.");
-            const parsedScenes = JSON.parse(rawText);
-
-            // تحويل كود الأنيميشن النصي إلى دالة رسم حية قابلة للتنفيذ
-            return parsedScenes.map(sc => {
+            return parsed.map(sc => {
                 let customDrawFn = null;
-                if (sc.animationType !== 'titration' && sc.canvasJsCode) {
-                    try {
-                        customDrawFn = new Function('ctx', 'w', 'h', 'progress', 't', sc.canvasJsCode);
-                    } catch (e) {
-                        console.warn("Could not compile custom animation function, using fallback", e);
-                    }
+                if(sc.animationType !== 'titration' && sc.canvasJsCode) {
+                    try { customDrawFn = new Function('ctx', 'w', 'h', 'progress', 't', sc.canvasJsCode); } catch(e){}
                 }
-                return {
-                    ...sc,
-                    animConfig: { chartTitle: sc.chartTitle || sc.visualTitle },
-                    customDrawFn
-                };
+                return { ...sc, animConfig: { chartTitle: sc.chartTitle || sc.visualTitle }, customDrawFn };
             });
         }
 
-        // تحويل PCM16 الخام القادم من Gemini TTS إلى ملف WAV قابل للتشغيل
-<!-- ... existing code ... -->
+        // توليد الصوت الإنجليزي
+        async function generateSceneAudio(text, voice) {
+            const url = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${apiKey}`;
+            const body = {
+                input: { text },
+                voice: { languageCode: 'en-US', name: voice },
+                audioConfig: { audioEncoding: 'LINEAR16', sampleRateHertz: 24000 }
+            };
             try {
-                // الخطوة 1: توليد السيناريو + كود الأنيميشن لكل مشهد
-                updateProgress(15, 'جاري تحليل البرومبت وبرمجة المشاهد المتحركة...');
-                const scenesScript = await generateVideoScriptAndAnimations(prompt, totalSeconds, selectedStyle);
+                const res = await fetch(url, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body) });
+                const data = await res.json();
+                if(data.audioContent) {
+                    const binary = atob(data.audioContent);
+                    const bytes = new Uint8Array(binary.length);
+                    for(let i=0; i<binary.length; i++) bytes[i] = binary.charCodeAt(i);
+                    const wavBuffer = createWavFile(bytes, 24000);
+                    const blob = new Blob([wavBuffer], { type: 'audio/wav' });
+                    return URL.createObjectURL(blob);
+                }
+            } catch(e){}
+            return null;
+        }
+
+        function createWavFile(pcmData, sampleRate) {
+            const header = new ArrayBuffer(44);
+            const view = new DataView(header);
+            const channels = 1, bitsPerSample = 16;
+            view.setUint8(0, 'R'.charCodeAt(0)); view.setUint8(1, 'I'.charCodeAt(0)); view.setUint8(2, 'F'.charCodeAt(0)); view.setUint8(3, 'F'.charCodeAt(0));
+            view.setUint32(4, 36 + pcmData.length, true);
+            view.setUint8(8, 'W'.charCodeAt(0)); view.setUint8(9, 'A'.charCodeAt(0)); view.setUint8(10, 'V'.charCodeAt(0)); view.setUint8(11, 'E'.charCodeAt(0));
+            view.setUint8(12, 'f'.charCodeAt(0)); view.setUint8(13, 'm'.charCodeAt(0)); view.setUint8(14, 't'.charCodeAt(0)); view.setUint8(15, ' '.charCodeAt(0));
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            view.setUint16(22, channels, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * channels * (bitsPerSample / 8), true);
+            view.setUint16(32, channels * (bitsPerSample / 8), true);
+            view.setUint16(34, bitsPerSample, true);
+            view.setUint8(36, 'd'.charCodeAt(0)); view.setUint8(37, 'a'.charCodeAt(0)); view.setUint8(38, 't'.charCodeAt(0)); view.setUint8(39, 'a'.charCodeAt(0));
+            view.setUint32(40, pcmData.length, true);
+            const wav = new Uint8Array(header.byteLength + pcmData.length);
+            wav.set(new Uint8Array(header), 0);
+            wav.set(pcmData, header.byteLength);
+            return wav;
+        }
+
+        // زر الإنشاء الرئيسي
+        document.getElementById('generate-btn').addEventListener('click', async () => {
+            const prompt = document.getElementById('prompt-input').value.trim();
+            if(!prompt) { showToast('يرجى كتابة البرومبت أولاً', 'error'); return; }
+            if(!apiKey) { showToast('يرجى إدخال مفتاح API أولاً', 'error'); apiModal.classList.remove('hidden'); return; }
+
+            const totalSeconds = Math.round(parseFloat(durationSlider.value) * 60);
+            const selectedVoice = document.getElementById('voice-select').value;
+            const withVoice = document.getElementById('narrator-toggle').checked;
+
+            const progressBox = document.getElementById('progress-box');
+            const progressBar = document.getElementById('progress-bar');
+            const progressStatus = document.getElementById('progress-status');
+            const progressPercent = document.getElementById('progress-percent');
+            progressBox.classList.remove('hidden');
+
+            try {
+                progressStatus.textContent = 'جاري تحليل البرومبت وبرمجة المشاهد المتحركة...';
+                progressBar.style.width = '20%';
+                progressPercent.textContent = '20%';
+
+                const scenes = await generateVideoScriptAndAnimations(prompt, totalSeconds);
                 
-                // ضبط مجموع مدد المشاهد لتطابق المدة المختارة بدقة
-                const rawSum = scenesScript.reduce((acc, s) => acc + s.durationSec, 0);
-                scenesScript.forEach(s => {
-                    s.durationSec = Math.max(5, Math.round((s.durationSec / rawSum) * totalSeconds));
-                });
-
                 generatedScenes = [];
-                const totalSteps = scenesScript.length;
+                for(let i=0; i<scenes.length; i++) {
+                    progressStatus.textContent = `جاري توليد الصوت والأنيميشن للمشهد ${i+1} من ${scenes.length}...`;
+                    progressBar.style.width = `${40 + Math.round((i+1)/scenes.length * 50)}%`;
+                    progressPercent.textContent = `${progressBar.style.width}`;
 
-                // الخطوة 2: توليد الصوت الإنجليزي لكل مشهد وربطه بالأنيميشن
-                for (let i = 0; i < totalSteps; i++) {
-                    const scene = scenesScript[i];
-                    const stepProgress = 25 + Math.round(((i + 1) / totalSteps) * 70);
-                    
-                    updateProgress(stepProgress, `جاري تجهيز الأنيميشن والصوت للمشهد ${i + 1} من ${totalSteps}...`);
-                    
                     let audioUrl = null;
-                    if (withVoice) {
-                        audioUrl = await generateSceneAudio(scene.narrationEn, selectedVoice);
+                    if(withVoice) {
+                        audioUrl = await generateSceneAudio(scenes[i].narrationEn, selectedVoice);
                     }
-
-                    generatedScenes.push({
-                        ...scene,
-                        audioUrl
-                    });
+                    generatedScenes.push({ ...scenes[i], audioUrl });
                 }
 
-                updateProgress(100, 'تم إنشاء الفيديو المتحرك بنجاح!');
-<!-- ... existing code ... -->
-            currentSceneIndex = index;
-            const scene = generatedScenes[index];
-            sceneStartTime = performance.now();
+                progressBox.classList.add('hidden');
+                document.getElementById('stage-placeholder').classList.add('hidden');
+                document.getElementById('play-pause-btn').disabled = false;
+                document.getElementById('export-video-btn').disabled = false;
 
-            // تحديث العناصر البصرية
-            stageSubtitle.textContent = scene.narrationEn;
-            currentSceneNum.textContent = scene.sceneNumber;
-            totalScenesNum.textContent = generatedScenes.length;
-            highlightActiveCard(index);
-<!-- ... existing code ... -->
-                scenesTimeline.innerHTML = generatedScenes.map((scene, idx) => `
-                <div onclick="window.jumpToScene(${idx})" id="scene-card-${idx}" class="scene-card cursor-pointer rounded-xl bg-zinc-900/90 border border-zinc-800 hover:border-purple-500/60 overflow-hidden transition flex flex-col">
-                    <div class="relative aspect-video bg-slate-950 flex flex-col items-center justify-center p-3 border-b border-zinc-800/80">
-                        <div class="text-2xl mb-1">${scene.animationType === 'titration' ? '🧪' : '✨'}</div>
-                        <div class="text-[11px] font-bold text-cyan-400 text-center line-clamp-1">${scene.visualTitle || 'Animated Scene'}</div>
-                        <span class="absolute top-2 right-2 bg-black/75 text-white text-[10px] font-bold px-2 py-0.5 rounded-md">
-                            مشهد ${scene.sceneNumber} (${scene.durationSec}ث)
-                        </span>
-                        ${scene.audioUrl ? '<span class="absolute bottom-2 left-2 bg-emerald-500/90 text-zinc-950 text-[10px] font-bold px-1.5 py-0.5 rounded">🎙️ EN</span>' : ''}
+                renderTimeline();
+                jumpToScene(0);
+                playVideo();
+                showToast('تم إنشاء الفيديو بالأنيميشن بنجاح!', 'success');
+
+            } catch(err) {
+                console.error(err);
+                progressBox.classList.add('hidden');
+                showToast('حدث خطأ أثناء الإنشاء، تأكد من مفتاح الـ API', 'error');
+            }
+        });
+
+        function renderTimeline() {
+            const timeline = document.getElementById('scenes-timeline');
+            timeline.innerHTML = generatedScenes.map((s, idx) => `
+                <div onclick="jumpToScene(${idx})" id="scene-card-${idx}" class="cursor-pointer rounded-xl bg-zinc-900/90 border border-zinc-800 hover:border-purple-500/60 p-2.5 transition flex flex-col justify-between">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-[10px] font-bold text-cyan-400">مشهد ${s.sceneNumber}</span>
+                        <span class="text-[10px] text-zinc-500">${s.durationSec}ث</span>
                     </div>
-                    <div class="p-3 flex-1 flex flex-col justify-between">
-                        <p class="text-xs text-zinc-300 font-medium mb-2 line-clamp-2">${scene.summaryAr}</p>
-                        <p class="text-[11px] text-zinc-500 italic line-clamp-2" dir="ltr">"${scene.narrationEn}"</p>
-                    </div>
+                    <p class="text-xs text-zinc-300 font-medium line-clamp-2">${s.summaryAr}</p>
                 </div>
             `).join('');
         }
 
-        // دالة الانتقال لمشهد معين عند النقر عليه في الخط الزمني
-<!-- ... existing code ... -->
-        // ميزة تصدير وتحميل الفيديو كملف فيديو حقيقي بالأنيميشن الحي (WebM)
-        exportVideoBtn.addEventListener('click', async () => {
-            if (!generatedScenes.length) return;
-            showToast('جاري تسجيل وتصدير الفيديو بالأنيميشن الحي...', 'info');
-            exportVideoBtn.disabled = true;
+        function highlightActiveCard(idx) {
+            document.querySelectorAll('#scenes-timeline > div').forEach((card, i) => {
+                if(i === idx) card.classList.add('border-purple-500', 'bg-purple-950/30');
+                else card.classList.remove('border-purple-500', 'bg-purple-950/30');
+            });
+        }
+
+        function jumpToScene(idx) {
+            if(!generatedScenes[idx]) return;
+            currentSceneIndex = idx;
+            const scene = generatedScenes[idx];
+            sceneStartTime = performance.now();
+
+            document.getElementById('stage-subtitle').textContent = scene.narrationEn;
+            document.getElementById('current-scene-num').textContent = scene.sceneNumber;
+            document.getElementById('total-scenes-num').textContent = generatedScenes.length;
+            highlightActiveCard(idx);
+
+            if(currentAudioElement) {
+                currentAudioElement.pause();
+                currentAudioElement = null;
+            }
+            if(isPlaying && scene.audioUrl) {
+                currentAudioElement = new Audio(scene.audioUrl);
+                currentAudioElement.play().catch(()=>{});
+                currentAudioElement.onended = () => {
+                    if(currentSceneIndex < generatedScenes.length - 1) {
+                        jumpToScene(currentSceneIndex + 1);
+                        playVideo();
+                    } else {
+                        pauseVideo();
+                    }
+                };
+            }
+        }
+
+        const playPauseBtn = document.getElementById('play-pause-btn');
+        playPauseBtn.addEventListener('click', () => {
+            if(isPlaying) pauseVideo(); else playVideo();
+        });
+
+        function playVideo() {
+            isPlaying = true;
+            playPauseBtn.textContent = '⏸';
+            sceneStartTime = performance.now();
+            const scene = generatedScenes[currentSceneIndex];
+            if(scene && scene.audioUrl && !currentAudioElement) {
+                currentAudioElement = new Audio(scene.audioUrl);
+                currentAudioElement.play().catch(()=>{});
+                currentAudioElement.onended = () => {
+                    if(currentSceneIndex < generatedScenes.length - 1) {
+                        jumpToScene(currentSceneIndex + 1);
+                        playVideo();
+                    } else {
+                        pauseVideo();
+                    }
+                };
+            }
+        }
+
+        function pauseVideo() {
+            isPlaying = false;
+            playPauseBtn.textContent = '▶';
+            if(currentAudioElement) {
+                currentAudioElement.pause();
+                currentAudioElement = null;
+            }
+            if(sceneTimer) clearTimeout(sceneTimer);
+        }
+
+        // تصدير الفيديو
+        document.getElementById('export-video-btn').addEventListener('click', async () => {
+            if(!generatedScenes.length) return;
+            showToast('جاري تسجيل وتصدير الفيديو بالأنيميشن...', 'info');
+            const exportBtn = document.getElementById('export-video-btn');
+            exportBtn.disabled = true;
 
             try {
                 const canvas = document.getElementById('export-canvas');
                 const ctx = canvas.getContext('2d');
                 const stream = canvas.captureStream(30);
-                const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+                const recorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
                 const chunks = [];
 
-                mediaRecorder.ondataavailable = e => {
-                    if (e.data.size > 0) chunks.push(e.data);
-                };
-
-                mediaRecorder.onstop = () => {
+                recorder.ondataavailable = e => { if(e.data.size > 0) chunks.push(e.data); };
+                recorder.onstop = () => {
                     const blob = new Blob(chunks, { type: 'video/webm' });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = `AI-Animated-Simulation-${Date.now()}.webm`;
+                    a.download = `AI-Simulation-${Date.now()}.webm`;
                     a.click();
                     URL.revokeObjectURL(url);
-                    exportVideoBtn.disabled = false;
-                    showToast('تم تحميل ملف الفيديو بالأنيميشن على جهازك بنجاح!', 'success');
+                    exportBtn.disabled = false;
+                    showToast('تم تحميل الفيديو بنجاح!', 'success');
                 };
 
-                mediaRecorder.start();
-
-                // تسجيل حركة أنيميشن حقيقية (30 إطار في الثانية) لكل مشهد مع الرسوم البيانية والترجمة
-                for (let i = 0; i < generatedScenes.length; i++) {
-                    const scene = generatedScenes[i];
-                    const frames = 90; // 3 ثوانٍ من الأنيميشن الكامل لكل مشهد في ملف التحميل
-                    for (let f = 0; f < frames; f++) {
+                recorder.start();
+                for(let i=0; i<generatedScenes.length; i++) {
+                    const sc = generatedScenes[i];
+                    const frames = 90;
+                    for(let f=0; f<frames; f++) {
                         const progress = f / frames;
                         const t = f / 30;
+                        drawDynamicSceneAnimation(ctx, canvas.width, canvas.height, progress, t, sc);
 
-                        drawDynamicSceneAnimation(ctx, canvas.width, canvas.height, progress, t, scene);
-
-                        // تظليل سفلي للترجمة
-                        ctx.fillStyle = 'rgba(0, 0, 0, 0.78)';
+                        ctx.fillStyle = 'rgba(0,0,0,0.78)';
                         ctx.fillRect(40, canvas.height - 110, canvas.width - 80, 75);
-
-                        // نص المتحدث الإنجليزي
                         ctx.fillStyle = '#ffffff';
                         ctx.font = 'bold 22px Inter, sans-serif';
                         ctx.textAlign = 'center';
-                        const shortText = scene.narrationEn.length > 95 ? scene.narrationEn.substring(0, 95) + '...' : scene.narrationEn;
-                        ctx.fillText(shortText, canvas.width / 2, canvas.height - 65);
+                        ctx.fillText(sc.narrationEn.substring(0, 95), canvas.width / 2, canvas.height - 65);
 
                         await new Promise(res => setTimeout(res, 33));
                     }
                 }
-
-                mediaRecorder.stop();
-            } catch (err) {
-                console.error(err);
-                exportVideoBtn.disabled = false;
-                showToast('تعذر تصدير الفيديو في هذا المتصفح.', 'error');
+                recorder.stop();
+            } catch(e) {
+                exportBtn.disabled = false;
+                showToast('تعذر تصدير الفيديو في هذا المتصفح', 'error');
             }
         });
     </script>
