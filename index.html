@@ -95,13 +95,46 @@
                 </div>
             </div>
             <div class="flex items-center gap-3">
-                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
+                <button id="open-api-modal-btn" class="px-3 py-1.5 rounded-full text-xs font-bold bg-zinc-800 hover:bg-zinc-700 text-amber-400 border border-amber-500/30 flex items-center gap-1.5 transition cursor-pointer">
+                    <i data-lucide="key" class="w-3.5 h-3.5"></i>
+                    <span id="api-status-text">إعداد مفتاح AI</span>
+                </button>
+                <span class="hidden sm:flex px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 items-center gap-1.5">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                     مدعوم بـ Gemini AI
                 </span>
             </div>
         </div>
     </header>
+
+    <!-- نافذة إدخال مفتاح API لتشغيل الموقع خارج المنصة (مثل GitHub) -->
+    <div id="api-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="glass-panel bg-zinc-900 border border-zinc-700 rounded-2xl max-w-md w-full p-6 shadow-2xl">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <i data-lucide="key-round" class="w-5 h-5 text-amber-400"></i>
+                    تفعيل الذكاء الاصطناعي (Gemini API Key)
+                </h3>
+                <button id="close-api-modal-btn" class="text-zinc-400 hover:text-white">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <p class="text-xs text-zinc-300 leading-relaxed mb-4">
+                لتشغيل الموقع على <b>GitHub</b> أو متصفحك، الصق مفتاح <b>Google Gemini API</b> المجاني الخاص بك هنا (يُحفظ في متصفحك فقط):
+            </p>
+            <input type="password" id="api-key-input" dir="ltr" placeholder="AIzaSy..." 
+                class="w-full bg-zinc-950 border border-zinc-700 rounded-xl p-3 text-sm text-white font-en focus:outline-none focus:border-purple-500 mb-3">
+            <div class="flex items-center justify-between gap-2">
+                <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-xs text-purple-400 hover:underline flex items-center gap-1">
+                    <span>احصل على مفتاح مجاني من هنا</span>
+                    <i data-lucide="external-link" class="w-3 h-3"></i>
+                </a>
+                <button id="save-api-key-btn" class="gradient-btn text-white text-xs font-bold px-5 py-2.5 rounded-xl">
+                    حفظ وتفعيل
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- صندوق التنبيهات المخصص (بديل alert) -->
     <div id="toast-container" class="fixed bottom-5 left-5 z-50 flex flex-col gap-2 max-w-sm"></div>
@@ -309,4 +342,767 @@
                                 <div id="timeline-track" class="flex-1 h-2 bg-zinc-700 rounded-full overflow-hidden cursor-pointer relative">
                                     <div id="timeline-fill" class="h-full bg-gradient-to-r from-purple-500 to-blue-500 w-0 transition-all duration-200"></div>
                                 </div>
-                                <span id="total-time-label" class="text-xs font-en text-
+                                <span id="total-time-label" class="text-xs font-en text-zinc-400 w-10 text-center">00:00</span>
+                            </div>
+
+                            <!-- زر تحميل الفيديو (WebM Export) -->
+                            <button id="export-video-btn" title="تصدير وتحميل الفيديو" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-white flex items-center gap-1.5 border border-zinc-700 transition">
+                                <i data-lucide="download" class="w-3.5 h-3.5 text-emerald-400"></i>
+                                <span class="hidden sm:inline">تصدير الفيديو</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- الخط الزمني للمشاهد والسيناريو (Storyboard & Script) -->
+            <div id="storyboard-section" class="hidden glass-panel rounded-2xl p-6 shadow-xl">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                    <div>
+                        <h3 class="text-base font-bold text-white flex items-center gap-2">
+                            <i data-lucide="list-video" class="w-5 h-5 text-blue-400"></i>
+                            الخط الزمني للمشاهد ونص المتحدث (Storyboard)
+                        </h3>
+                        <p class="text-xs text-zinc-400">اضغط على أي مشهد للانتقال إليه مباشرة أو معاينة نص الشرح الإنجليزي</p>
+                    </div>
+                    <span id="script-meta" class="text-xs bg-zinc-800 text-zinc-300 px-3 py-1.5 rounded-lg font-semibold"></span>
+                </div>
+
+                <!-- قائمة بطاقات المشاهد -->
+                <div id="scenes-list" class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[420px] overflow-y-auto pr-1">
+                    <!-- يتم توليد المشاهد هنا ديناميكياً -->
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- عنصر Canvas مخفي لتصدير الفيديو كملف WebM قابل للتحميل -->
+    <canvas id="export-canvas" width="1280" height="720" class="hidden"></canvas>
+
+    <script>
+        // تهيئة أيقونات Lucide
+        lucide.createIcons();
+
+        // إدارة مفتاح API (يقرأ من المتصفح إذا تم رفعه على GitHub أو يتركه فارغاً داخل المنصة)
+        let apiKey = localStorage.getItem('gemini_user_api_key') || "";
+
+        const apiModal = document.getElementById('api-modal');
+        const openApiModalBtn = document.getElementById('open-api-modal-btn');
+        const closeApiModalBtn = document.getElementById('close-api-modal-btn');
+        const apiKeyInput = document.getElementById('api-key-input');
+        const saveApiKeyBtn = document.getElementById('save-api-key-btn');
+        const apiStatusText = document.getElementById('api-status-text');
+
+        function updateApiStatusBadge() {
+            if (apiKey) {
+                apiStatusText.textContent = "المفتاح مُفعّل ✓";
+                openApiModalBtn.classList.replace('text-amber-400', 'text-emerald-400');
+                openApiModalBtn.classList.replace('border-amber-500/30', 'border-emerald-500/30');
+            } else {
+                apiStatusText.textContent = "إعداد مفتاح AI";
+            }
+        }
+        updateApiStatusBadge();
+
+        openApiModalBtn.addEventListener('click', () => {
+            apiKeyInput.value = apiKey;
+            apiModal.classList.remove('hidden');
+        });
+        closeApiModalBtn.addEventListener('click', () => apiModal.classList.add('hidden'));
+        saveApiKeyBtn.addEventListener('click', () => {
+            apiKey = apiKeyInput.value.trim();
+            localStorage.setItem('gemini_user_api_key', apiKey);
+            updateApiStatusBadge();
+            apiModal.classList.add('hidden');
+            showToast(apiKey ? 'تم حفظ المفتاح وتفعيل الذكاء الاصطناعي بنجاح!' : 'تم مسح المفتاح.', 'success');
+        });
+
+        // عناصر واجهة المستخدم
+        const promptInput = document.getElementById('prompt-input');
+        const charCount = document.getElementById('char-count');
+        const durationSlider = document.getElementById('duration-slider');
+        const durationDisplay = document.getElementById('duration-display');
+        const scenesEstimate = document.getElementById('scenes-estimate');
+        const narratorToggle = document.getElementById('narrator-toggle');
+        const narratorOptions = document.getElementById('narrator-options');
+        const voiceLang = document.getElementById('voice-lang');
+        const voicePersona = document.getElementById('voice-persona');
+        const styleBtns = document.querySelectorAll('.style-btn');
+        const generateBtn = document.getElementById('generate-btn');
+
+        // عناصر المشغل
+        const emptyState = document.getElementById('empty-state');
+        const loadingState = document.getElementById('loading-state');
+        const loadingTitle = document.getElementById('loading-title');
+        const loadingSubtitle = document.getElementById('loading-subtitle');
+        const progressBar = document.getElementById('progress-bar');
+        const progressPercent = document.getElementById('progress-percent');
+        const activeVideoStage = document.getElementById('active-video-stage');
+        const stageImage = document.getElementById('stage-image');
+        const stageSubtitle = document.getElementById('stage-subtitle');
+        const currentSceneNum = document.getElementById('current-scene-num');
+        const totalScenesNum = document.getElementById('total-scenes-num');
+        const playPauseBtn = document.getElementById('play-pause-btn');
+        const timelineFill = document.getElementById('timeline-fill');
+        const currentTimeLabel = document.getElementById('current-time-label');
+        const totalTimeLabel = document.getElementById('total-time-label');
+        const speakerStatus = document.getElementById('speaker-status');
+        const voiceWaves = document.getElementById('voice-waves');
+        const videoBadge = document.getElementById('video-badge');
+        const storyboardSection = document.getElementById('storyboard-section');
+        const scenesList = document.getElementById('scenes-list');
+        const scriptMeta = document.getElementById('script-meta');
+        const exportVideoBtn = document.getElementById('export-video-btn');
+
+        // حالة التطبيق
+        let selectedStyle = "Cinematic 4K realistic photography, dramatic lighting";
+        let generatedScenes = []; // مصفوفة المشاهد: { sceneNumber, durationSec, narrationEn, summaryAr, imagePrompt, imageUrl, audioUrl }
+        let currentSceneIndex = 0;
+        let isPlaying = false;
+        let currentAudioElement = null;
+        let sceneTimer = null;
+        let elapsedSeconds = 0;
+        let totalVideoSeconds = 0;
+        let clockInterval = null;
+
+        // دالة إظهار الإشعارات (بديل alert)
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const colors = {
+                info: 'bg-zinc-900 border-purple-500/50 text-white',
+                success: 'bg-emerald-950/90 border-emerald-500/50 text-emerald-200',
+                error: 'bg-red-950/90 border-red-500/50 text-red-200'
+            };
+            toast.className = `p-3.5 rounded-xl border shadow-xl text-xs font-semibold flex items-center gap-2.5 transition-all duration-300 ${colors[type] || colors.info}`;
+            toast.innerHTML = `<span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // تحديث عداد الأحرف
+        promptInput.addEventListener('input', () => {
+            charCount.textContent = `${promptInput.value.length} حرف`;
+        });
+
+        // تحديث شريط المدة الزمنية (من 30 ثانية إلى 10 دقائق)
+        function updateDurationUI() {
+            const mins = parseFloat(durationSlider.value);
+            const totalSecs = Math.round(mins * 60);
+            const displayMins = mins < 1 ? `${totalSecs} ثانية` : `${mins} دقيقة (${totalSecs} ثانية)`;
+            durationDisplay.textContent = displayMins;
+
+            // حساب عدد المشاهد المقترح بناءً على المدة (بحد أقصى 12 مشهد ذكي لتغطية حتى 10 دقائق بكفاءة)
+            const estimatedScenes = Math.min(12, Math.max(3, Math.ceil(mins * 1.2)));
+            const secPerScene = Math.round(totalSecs / estimatedScenes);
+            scenesEstimate.innerHTML = `<i data-lucide="layers" class="w-3.5 h-3.5 text-purple-400"></i> سيتم تقسيم الفيديو إلى <b>${estimatedScenes} مشاهد</b> (حوالي ${secPerScene} ثانية لكل مشهد).`;
+            lucide.createIcons();
+        }
+        durationSlider.addEventListener('input', updateDurationUI);
+        updateDurationUI();
+
+        // تفعيل/تعطيل خيارات المتحدث
+        narratorToggle.addEventListener('change', () => {
+            if (narratorToggle.checked) {
+                narratorOptions.classList.remove('opacity-40', 'pointer-events-none');
+            } else {
+                narratorOptions.classList.add('opacity-40', 'pointer-events-none');
+            }
+        });
+
+        // اختيار النمط البصري
+        styleBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                styleBtns.forEach(b => {
+                    b.classList.remove('active', 'border-purple-500', 'bg-purple-500/20');
+                    b.classList.add('border-zinc-700', 'bg-zinc-900/80');
+                });
+                btn.classList.add('active', 'border-purple-500', 'bg-purple-500/20');
+                btn.classList.remove('border-zinc-700', 'bg-zinc-900/80');
+                selectedStyle = btn.dataset.style;
+            });
+        });
+
+        // دالة مساعدة لإعادة المحاولة مع تأخير أسي (Exponential Backoff)
+        async function fetchWithRetry(url, options, maxRetries = 4) {
+            let delay = 1000;
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return await response.json();
+                } catch (err) {
+                    if (i === maxRetries - 1) throw err;
+                    await new Promise(res => setTimeout(res, delay));
+                    delay *= 2;
+                }
+            }
+        }
+
+        // تحديث شاشة التحميل
+        function setProgress(percent, title, subtitle) {
+            progressBar.style.width = `${percent}%`;
+            progressPercent.textContent = `${percent}%`;
+            if (title) loadingTitle.textContent = title;
+            if (subtitle) loadingSubtitle.textContent = subtitle;
+        }
+
+        // 1. توليد السيناريو وتقسيم المشاهد باستخدام Gemini 3 Flash
+        async function generateVideoScript(userPrompt, totalMinutes, visualStyle) {
+            const totalSeconds = Math.round(totalMinutes * 60);
+            const sceneCount = Math.min(12, Math.max(3, Math.ceil(totalMinutes * 1.2)));
+            const secPerScene = Math.round(totalSeconds / sceneCount);
+
+            const systemPrompt = `You are an expert AI video director and documentary scriptwriter.
+Your task is to take a user's prompt (which may be in Arabic or English) and transform it into a structured, engaging video storyboard of exactly ${sceneCount} scenes, designed for a total video duration of ${totalSeconds} seconds (~${secPerScene} seconds per scene).
+Rules:
+1. 'narrationEn' MUST be written in clear, engaging, natural spoken English suitable for a professional voiceover narrator. Make the narration detailed enough to fit the pacing of ${secPerScene} seconds per scene (around ${Math.max(20, Math.round(secPerScene * 2.2))} words per scene).
+2. 'summaryAr' MUST be a short, clear Arabic title/summary of what happens in this scene.
+3. 'imagePrompt' MUST be a rich, descriptive English visual prompt for an image generator describing the scene in the style of: "${visualStyle}". Do NOT include text/words inside the image prompt.`;
+
+            const payload = {
+                contents: [{
+                    parts: [{
+                        text: `Create a ${sceneCount}-scene video plan for a ${totalMinutes}-minute (${totalSeconds} seconds) video based on this prompt:\n"${userPrompt}"`
+                    }]
+                }],
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                },
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "ARRAY",
+                        items: {
+                            type: "OBJECT",
+                            properties: {
+                                sceneNumber: { type: "INTEGER" },
+                                durationSec: { type: "INTEGER" },
+                                summaryAr: { type: "STRING" },
+                                narrationEn: { type: "STRING" },
+                                imagePrompt: { type: "STRING" }
+                            },
+                            required: ["sceneNumber", "durationSec", "summaryAr", "narrationEn", "imagePrompt"]
+                        }
+                    }
+                }
+            };
+
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+            const data = await fetchWithRetry(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const jsonText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (!jsonText) throw new Error("فشل الذكاء الاصطناعي في توليد السيناريو.");
+            return JSON.parse(jsonText);
+        }
+
+        // 2. توليد صورة لكل مشهد باستخدام Gemini 3.1 Flash Lite Image
+        async function generateSceneImage(imagePrompt) {
+            const payload = {
+                contents: [{
+                    parts: [{ text: imagePrompt }]
+                }],
+                generationConfig: {
+                    responseModalities: ['IMAGE'],
+                    imageConfig: { aspectRatio: "16:9" }
+                }
+            };
+
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-image:generateContent?key=${apiKey}`;
+            try {
+                const data = await fetchWithRetry(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const part = data?.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+                if (part && part.inlineData?.data) {
+                    return `data:${part.inlineData.mimeType || 'image/png'};base64,${part.inlineData.data}`;
+                }
+            } catch (e) {
+                console.warn("Image generation fallback triggered", e);
+            }
+            // صورة احتياطية أنيقة في حال تعذر التوليد
+            return `https://placehold.co/1280x720/18181b/a855f7?text=AI+Generated+Scene`;
+        }
+
+        // تحويل PCM16 الخام القادم من Gemini TTS إلى ملف WAV قابل للتشغيل
+        function base64ToArrayBuffer(base64) {
+            const binaryString = atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        function pcmToWav(pcm16Array, sampleRate) {
+            const numChannels = 1;
+            const byteRate = sampleRate * numChannels * 2;
+            const blockAlign = numChannels * 2;
+            const dataSize = pcm16Array.length * 2;
+            const buffer = new ArrayBuffer(44 + dataSize);
+            const view = new DataView(buffer);
+
+            const writeString = (offset, string) => {
+                for (let i = 0; i < string.length; i++) {
+                    view.setUint8(offset + i, string.charCodeAt(i));
+                }
+            };
+
+            writeString(0, 'RIFF');
+            view.setUint32(4, 36 + dataSize, true);
+            writeString(8, 'WAVE');
+            writeString(12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            view.setUint16(22, numChannels, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, byteRate, true);
+            view.setUint16(32, blockAlign, true);
+            view.setUint16(34, 16, true);
+            writeString(36, 'data');
+            view.setUint32(40, dataSize, true);
+
+            let offset = 44;
+            for (let i = 0; i < pcm16Array.length; i++, offset += 2) {
+                view.setInt16(offset, pcm16Array[i], true);
+            }
+
+            return new Blob([buffer], { type: 'audio/wav' });
+        }
+
+        // 3. توليد الصوت البشري للمتحدث باستخدام Gemini 2.5 Flash Preview TTS
+        async function generateSceneVoice(textEn, voiceName) {
+            const payload = {
+                contents: [{
+                    parts: [{ text: `Read clearly and engagingly like a professional video narrator: ${textEn}` }]
+                }],
+                generationConfig: {
+                    responseModalities: ["AUDIO"],
+                    speechConfig: {
+                        voiceConfig: {
+                            prebuiltVoiceConfig: { voiceName: voiceName }
+                        }
+                    }
+                },
+                model: "gemini-2.5-flash-preview-tts"
+            };
+
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+            try {
+                const data = await fetchWithRetry(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const part = data?.candidates?.[0]?.content?.parts?.[0];
+                const audioData = part?.inlineData?.data;
+                const mimeType = part?.inlineData?.mimeType;
+
+                if (audioData && mimeType && mimeType.startsWith("audio/")) {
+                    const rateMatch = mimeType.match(/rate=(\d+)/);
+                    const sampleRate = rateMatch ? parseInt(rateMatch[1], 10) : 24000;
+                    const pcmBuffer = base64ToArrayBuffer(audioData);
+                    const pcm16 = new Int16Array(pcmBuffer);
+                    const wavBlob = pcmToWav(pcm16, sampleRate);
+                    return URL.createObjectURL(wavBlob);
+                }
+            } catch (e) {
+                console.warn("TTS API fallback to Web Speech API", e);
+            }
+            return null; // في حال الفشل، سيستخدم المشغل ميزة النطق المدمجة في المتصفح كاحتياطي
+        }
+
+        // تنسيق الثواني إلى MM:SS
+        function formatTime(secs) {
+            const m = Math.floor(secs / 60).toString().padStart(2, '0');
+            const s = Math.floor(secs % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        // بناء واجهة الخط الزمني للمشاهد
+        function renderStoryboard() {
+            scenesList.innerHTML = '';
+            generatedScenes.forEach((scene, index) => {
+                const card = document.createElement('div');
+                card.id = `scene-card-${index}`;
+                card.className = `p-3.5 rounded-xl border transition cursor-pointer flex gap-3 items-start ${index === currentSceneIndex ? 'bg-purple-950/30 border-purple-500' : 'bg-zinc-900/70 border-zinc-800 hover:border-zinc-600'}`;
+                card.onclick = () => jumpToScene(index, true);
+
+                card.innerHTML = `
+                    <div class="relative w-24 h-16 rounded-lg overflow-hidden bg-zinc-950 shrink-0 border border-zinc-700">
+                        <img src="${scene.imageUrl}" alt="Scene ${scene.sceneNumber}" class="w-full h-full object-cover">
+                        <span class="absolute bottom-1 right-1 bg-black/80 text-[10px] px-1.5 py-0.5 rounded text-white font-en">${scene.durationSec}s</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between gap-1 mb-1">
+                            <span class="text-xs font-bold text-purple-400">مشهد ${scene.sceneNumber}</span>
+                            ${scene.audioUrl ? '<span class="text-[10px] text-emerald-400 flex items-center gap-0.5"><i data-lucide="volume-2" class="w-3 h-3"></i> صوت AI</span>' : ''}
+                        </div>
+                        <h4 class="text-xs font-bold text-white truncate mb-1">${scene.summaryAr}</h4>
+                        <p dir="ltr" class="font-en text-[11px] text-zinc-400 line-clamp-2 leading-snug">${scene.narrationEn}</p>
+                    </div>
+                `;
+                scenesList.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        // تحديث تمييز البطاقة النشطة في الخط الزمني
+        function highlightActiveCard(index) {
+            generatedScenes.forEach((_, idx) => {
+                const card = document.getElementById(`scene-card-${idx}`);
+                if (!card) return;
+                if (idx === index) {
+                    card.classList.add('bg-purple-950/30', 'border-purple-500');
+                    card.classList.remove('bg-zinc-900/70', 'border-zinc-800');
+                    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                } else {
+                    card.classList.remove('bg-purple-950/30', 'border-purple-500');
+                    card.classList.add('bg-zinc-900/70', 'border-zinc-800');
+                }
+            });
+        }
+
+        // إيقاف أي صوت أو مؤقت حالي
+        function stopPlaybackTimers() {
+            if (sceneTimer) clearTimeout(sceneTimer);
+            if (clockInterval) clearInterval(clockInterval);
+            if (currentAudioElement) {
+                currentAudioElement.pause();
+                currentAudioElement.currentTime = 0;
+                currentAudioElement = null;
+            }
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+            voiceWaves.classList.add('hidden');
+            speakerStatus.textContent = 'Paused';
+        }
+
+        // تشغيل مشهد محدد
+        function playScene(index) {
+            if (index >= generatedScenes.length) {
+                // نهاية الفيديو
+                isPlaying = false;
+                stopPlaybackTimers();
+                updatePlayButtonIcon();
+                speakerStatus.textContent = 'Finished';
+                showToast('اكتمل عرض الفيديو بنجاح!', 'success');
+                return;
+            }
+
+            currentSceneIndex = index;
+            const scene = generatedScenes[index];
+
+            // تحديث العناصر البصرية
+            stageImage.src = scene.imageUrl;
+            stageSubtitle.textContent = scene.narrationEn;
+            currentSceneNum.textContent = scene.sceneNumber;
+            totalScenesNum.textContent = generatedScenes.length;
+            highlightActiveCard(index);
+
+            // حساب الوقت المنقضي قبل هذا المشهد
+            let previousSeconds = 0;
+            for (let i = 0; i < index; i++) {
+                previousSeconds += generatedScenes[i].durationSec;
+            }
+            elapsedSeconds = previousSeconds;
+            currentTimeLabel.textContent = formatTime(elapsedSeconds);
+            timelineFill.style.width = `${Math.min(100, (elapsedSeconds / totalVideoSeconds) * 100)}%`;
+
+            // تشغيل ساعة التقدم المستمرة
+            if (clockInterval) clearInterval(clockInterval);
+            clockInterval = setInterval(() => {
+                if (!isPlaying) return;
+                elapsedSeconds += 0.25;
+                if (elapsedSeconds > totalVideoSeconds) elapsedSeconds = totalVideoSeconds;
+                currentTimeLabel.textContent = formatTime(elapsedSeconds);
+                timelineFill.style.width = `${Math.min(100, (elapsedSeconds / totalVideoSeconds) * 100)}%`;
+            }, 250);
+
+            const useNarrator = narratorToggle.checked;
+
+            if (useNarrator && scene.audioUrl) {
+                // تشغيل صوت Gemini AI TTS
+                speakerStatus.textContent = 'Speaking (AI Voice)';
+                voiceWaves.classList.remove('hidden');
+                currentAudioElement = new Audio(scene.audioUrl);
+                currentAudioElement.play().catch(e => console.warn("Audio autoplay prevented", e));
+
+                // الانتقال للمشهد التالي عند انتهاء الصوت أو انتهاء مدة المشهد (أيهما أطول لضمان عدم قطع الكلام)
+                let audioDone = false;
+                let minTimeDone = false;
+                const minDurationMs = Math.max(4000, scene.durationSec * 1000);
+
+                const checkNext = () => {
+                    if (audioDone && minTimeDone && isPlaying) {
+                        playScene(index + 1);
+                    }
+                };
+
+                currentAudioElement.onended = () => {
+                    voiceWaves.classList.add('hidden');
+                    speakerStatus.textContent = 'Listening...';
+                    audioDone = true;
+                    checkNext();
+                };
+
+                sceneTimer = setTimeout(() => {
+                    minTimeDone = true;
+                    checkNext();
+                }, minDurationMs);
+
+            } else if (useNarrator && 'speechSynthesis' in window) {
+                // استخدام نطق المتصفح الاحتياطي بالإنجليزية
+                speakerStatus.textContent = 'Speaking (EN)';
+                voiceWaves.classList.remove('hidden');
+                const utterance = new SpeechSynthesisUtterance(scene.narrationEn);
+                utterance.lang = voiceLang.value || 'en-US';
+                utterance.rate = 0.95;
+
+                let speechDone = false;
+                let minTimeDone = false;
+                const minDurationMs = Math.max(4000, scene.durationSec * 1000);
+
+                const checkNext = () => {
+                    if (speechDone && minTimeDone && isPlaying) {
+                        playScene(index + 1);
+                    }
+                };
+
+                utterance.onend = () => {
+                    voiceWaves.classList.add('hidden');
+                    speechDone = true;
+                    checkNext();
+                };
+
+                window.speechSynthesis.speak(utterance);
+                sceneTimer = setTimeout(() => {
+                    minTimeDone = true;
+                    checkNext();
+                }, minDurationMs);
+
+            } else {
+                // وضع صامت (بدون متحدث)
+                speakerStatus.textContent = 'Narrator Muted';
+                voiceWaves.classList.add('hidden');
+                sceneTimer = setTimeout(() => {
+                    if (isPlaying) playScene(index + 1);
+                }, scene.durationSec * 1000);
+            }
+        }
+
+        function jumpToScene(index, autoPlay = true) {
+            stopPlaybackTimers();
+            currentSceneIndex = index;
+            if (autoPlay) {
+                isPlaying = true;
+                updatePlayButtonIcon();
+                playScene(index);
+            } else {
+                const scene = generatedScenes[index];
+                stageImage.src = scene.imageUrl;
+                stageSubtitle.textContent = scene.narrationEn;
+                currentSceneNum.textContent = scene.sceneNumber;
+                highlightActiveCard(index);
+            }
+        }
+
+        function updatePlayButtonIcon() {
+            playPauseBtn.innerHTML = isPlaying
+                ? `<i data-lucide="pause" class="w-4 h-4 fill-current"></i>`
+                : `<i data-lucide="play" class="w-4 h-4 fill-current"></i>`;
+            lucide.createIcons();
+        }
+
+        // زر التشغيل / الإيقاف المؤقت
+        playPauseBtn.addEventListener('click', () => {
+            if (!generatedScenes.length) return;
+            if (isPlaying) {
+                isPlaying = false;
+                stopPlaybackTimers();
+                updatePlayButtonIcon();
+            } else {
+                isPlaying = true;
+                updatePlayButtonIcon();
+                playScene(currentSceneIndex);
+            }
+        });
+
+        // العملية الرئيسية: توليد الفيديو الكامل عند الضغط على الزر
+        generateBtn.addEventListener('click', async () => {
+            const prompt = promptInput.value.trim();
+            if (!prompt) {
+                showToast('يرجى كتابة البرومبت أو فكرة الفيديو أولاً!', 'error');
+                promptInput.focus();
+                return;
+            }
+
+            // إيقاف أي عرض سابق وتجهيز الواجهة
+            stopPlaybackTimers();
+            isPlaying = false;
+            generateBtn.disabled = true;
+            emptyState.classList.add('hidden');
+            activeVideoStage.classList.add('hidden');
+            storyboardSection.classList.add('hidden');
+            loadingState.classList.remove('hidden');
+
+            const durationMins = parseFloat(durationSlider.value);
+            const selectedVoice = voicePersona.value;
+            const useNarrator = narratorToggle.checked;
+
+            try {
+                // الخطوة 1: كتابة السيناريو وتقسيم المشاهد
+                setProgress(15, 'جاري كتابة السيناريو وتقسيم المشاهد...', `تجهيز خطة فيديو مدتها ${durationMins} دقيقة بالذكاء الاصطناعي`);
+                const scriptScenes = await generateVideoScript(prompt, durationMins, selectedStyle);
+
+                // ضبط المدة الإجمالية الدقيقة بناءً على المشاهد
+                const targetTotalSec = Math.round(durationMins * 60);
+                const exactSecPerScene = Math.max(5, Math.round(targetTotalSec / scriptScenes.length));
+                scriptScenes.forEach(s => s.durationSec = exactSecPerScene);
+
+                generatedScenes = [];
+                const totalSteps = scriptScenes.length;
+
+                // الخطوة 2: توليد الصور والصوت لكل مشهد بالتتابع لضمان الجودة وعدم تجاوز حدود الطلبات
+                for (let i = 0; i < totalSteps; i++) {
+                    const scene = scriptScenes[i];
+                    const baseProgress = 20 + Math.round((i / totalSteps) * 75);
+                    setProgress(
+                        baseProgress,
+                        `جاري إنتاج المشهد (${i + 1} من ${totalSteps})...`,
+                        `رسم المشهد وتوليد صوت المتحدث الإنجليزي: "${scene.summaryAr}"`
+                    );
+
+                    // توليد الصورة والصوت بالتوازي لنفس المشهد لتسريع الإنتاج
+                    const [imageUrl, audioUrl] = await Promise.all([
+                        generateSceneImage(scene.imagePrompt),
+                        useNarrator ? generateSceneVoice(scene.narrationEn, selectedVoice) : Promise.resolve(null)
+                    ]);
+
+                    generatedScenes.push({
+                        ...scene,
+                        imageUrl,
+                        audioUrl
+                    });
+                }
+
+                setProgress(100, 'اكتمل إنتاج الفيديو بنجاح!', 'جاري تشغيل العرض...');
+
+                // حساب المدة الكلية
+                totalVideoSeconds = generatedScenes.reduce((acc, s) => acc + s.durationSec, 0);
+                totalTimeLabel.textContent = formatTime(totalVideoSeconds);
+                scriptMeta.textContent = `${generatedScenes.length} مشاهد • المدة الكلية: ${formatTime(totalVideoSeconds)}`;
+
+                // إظهار المشغل والخط الزمني
+                setTimeout(() => {
+                    loadingState.classList.add('hidden');
+                    activeVideoStage.classList.remove('hidden');
+                    storyboardSection.classList.remove('hidden');
+                    videoBadge.classList.remove('hidden');
+
+                    renderStoryboard();
+                    isPlaying = true;
+                    updatePlayButtonIcon();
+                    playScene(0);
+                    showToast('تم إنشاء الفيديو بنجاح! استمتع بالمشاهدة.', 'success');
+                }, 600);
+
+            } catch (error) {
+                console.error(error);
+                loadingState.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                // إذا كان الموقع يعمل على GitHub بدون مفتاح API، نفتح نافذة إدخال المفتاح تلقائياً
+                if (!apiKey && window.location.hostname.includes('github.io')) {
+                    showToast('يرجى إدخال مفتاح Gemini API أولاً لتشغيل الموقع على GitHub!', 'error');
+                    apiModal.classList.remove('hidden');
+                } else {
+                    showToast('تعذر الاتصال بالذكاء الاصطناعي. تأكد من صحة مفتاح API أو الاتصال بالإنترنت.', 'error');
+                }
+            } finally {
+                generateBtn.disabled = false;
+            }
+        });
+
+        // ميزة تصدير وتحميل الفيديو كملف فيديو حقيقي (WebM)
+        exportVideoBtn.addEventListener('click', async () => {
+            if (!generatedScenes.length) return;
+            showToast('جاري تجهيز وتصدير ملف الفيديو للتحميل...', 'info');
+            exportVideoBtn.disabled = true;
+
+            try {
+                const canvas = document.getElementById('export-canvas');
+                const ctx = canvas.getContext('2d');
+                const stream = canvas.captureStream(30);
+                const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+                const chunks = [];
+
+                mediaRecorder.ondataavailable = e => {
+                    if (e.data.size > 0) chunks.push(e.data);
+                };
+
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(chunks, { type: 'video/webm' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `AI-Video-${Date.now()}.webm`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    exportVideoBtn.disabled = false;
+                    showToast('تم تحميل ملف الفيديو على جهازك بنجاح!', 'success');
+                };
+
+                mediaRecorder.start();
+
+                // رسم ملخص المشاهد والترجمة على الكانفاس لتصدير سريع وفعال (2 ثانية لكل مشهد في الملف المصدّر)
+                for (let i = 0; i < generatedScenes.length; i++) {
+                    const scene = generatedScenes[i];
+                    const img = new Image();
+                    img.crossOrigin = "anonymous";
+                    img.src = scene.imageUrl;
+                    await new Promise(res => { img.onload = res; img.onerror = res; });
+
+                    // رسم الصورة
+                    ctx.fillStyle = '#09090b';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                    // تظليل سفلي للترجمة
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
+                    ctx.fillRect(40, canvas.height - 130, canvas.width - 80, 90);
+
+                    // نص المتحدث الإنجليزي
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 24px Inter, sans-serif';
+                    ctx.textAlign = 'center';
+                    const shortText = scene.narrationEn.length > 95 ? scene.narrationEn.substring(0, 95) + '...' : scene.narrationEn;
+                    ctx.fillText(shortText, canvas.width / 2, canvas.height - 78);
+
+                    await new Promise(res => setTimeout(res, 1500));
+                }
+
+                mediaRecorder.stop();
+            } catch (err) {
+                console.error(err);
+                exportVideoBtn.disabled = false;
+                showToast('تعذر تصدير الفيديو في هذا المتصفح.', 'error');
+            }
+        });
+    </script>
+</body>
+</html>
+```
